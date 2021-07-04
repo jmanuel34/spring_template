@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	<!-- habilita en uso de anotaciones de configuración -->
+	<context:annotation-config/>
+	<!-- le indica a spring el nombre del paquete a escanear en busca de clases
+	para instanciar -->
+	<context:component-scan base-package="dao"/>
+
+	<bean id="data"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"
+			value="com.mysql.cj.jdbc.Driver">
+		</property>
+		<property name="url"
+			value="jdbc:mysql://localhost:3307/formacion?serverTimezone=UTC">
+		</property>
+		<property name="username" value="root"></property>
+		<property name="password" value="root"></property>
+	</bean>
+	<jee:jndi-lookup jndi-name="refformacion" id="data2"/>
+	
+	<!-- Configuración spring jpa hibernate -->
+	
+	<!-- adaptador de integración de JPA-Hibernate en Spring-->
+	<bean id="adapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="databasePlatform"
+			value="org.hibernate.dialect.MySQLDialect">
+		</property>
+	</bean>
+	<!-- configuración JPA -->
+	<bean id="factory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="formacionPU"></property>
+		<property name="dataSource" ref="data2"></property>
+		<property name="jpaVendorAdapter" ref="adapter"></property>
+		<property name="packagesToScan" value="model"></property>
+	</bean>
+	<!-- transaccionalidad -->
+	<!-- crea el objeto encargado de la transacción -->
+	<bean id="txManager"
+		class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="factory"></property>
+	</bean>
+	<!-- habilita la transaccionalidad mediante anotaciones -->
+	<tx:annotation-driven transaction-manager="txManager"/>	
+</beans>
